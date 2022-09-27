@@ -67,13 +67,15 @@ func Generate() error {
 Group
 
 ```go
-ctx := context.Background()
-group := mageutil.NewGroup(ctx)
-group.Go(func() error {
-	return RunDir(ctx, "../livekit", "bin/livekit-server --dev")
-})
-group.Go(func() error {
-	return Run(ctx, "docker run --rm -e EGRESS_CONFIG_FILE=/out/local.yaml -v ~/livekit/egress/test:/out livekit/egress")
-})
-group.Wait()
+func RunLivekitWithEgress() error {
+    ctx := context.Background()
+    group := mageutil.NewGroup(ctx)
+    group.Go(func () error {
+        return RunDir(ctx, "../livekit", "bin/livekit-server --dev")
+    })
+    group.Go(func () error {
+        return Run(ctx, "docker run --rm -e EGRESS_CONFIG_FILE=/out/local.yaml -v ~/livekit/egress/test:/out livekit/egress")
+    })
+    group.Wait()
+}
 ```
