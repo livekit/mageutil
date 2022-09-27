@@ -15,14 +15,14 @@ type Group struct {
 	cancel func()
 }
 
-func NewGroup(ctx context.Context) *Group {
+func NewGroup(ctx context.Context) (*Group, context.Context) {
 	ctx, cancel := context.WithCancel(ctx)
 	group, ctx := errgroup.WithContext(ctx)
 
 	return &Group{
 		Group:  group,
 		cancel: cancel,
-	}
+	}, ctx
 }
 
 func (g *Group) Cancel() {
