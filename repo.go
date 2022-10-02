@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 )
 
-func CloneRepo(org, name string, basePath string) error {
+func CloneRepo(org, name string, basePath string, branch string) error {
 	targetDir := path.Join(basePath, name)
 	if _, err := os.Stat(targetDir); !os.IsNotExist(err) {
 		fmt.Printf("%s already exists, updating\n", name)
 		// ignore errors as there could be local changes that cause update to fail
-		_ = UpdateRepo(name, basePath)
+		_ = UpdateRepo(name, basePath, branch)
 		return nil
 	}
 	fmt.Println("cloning", name)
@@ -24,13 +24,13 @@ func CloneRepo(org, name string, basePath string) error {
 	return cmd.Run()
 }
 
-func UpdateRepo(name string, basePath string) error {
+func UpdateRepo(name string, basePath string, branch string) error {
 	targetDir := path.Join(basePath, name)
 	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
 		return err
 	}
 	fmt.Println("updating", name)
-	checkout := exec.Command("git", "checkout", "master")
+	checkout := exec.Command("git", "checkout", branch)
 	checkout.Dir = filepath.Join(basePath, name)
 	ConnectStd(checkout)
 	checkout.Run()
