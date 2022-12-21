@@ -1,6 +1,7 @@
 package mageutil
 
 import (
+	"encoding/json"
 	"fmt"
 	"go/build"
 	"os"
@@ -54,4 +55,21 @@ func GetToolPath(name string) (string, error) {
 		return "", err
 	}
 	return p, nil
+}
+
+type packageInfo struct {
+	Dir string
+}
+
+func GetPkgDir(pkg string) (string, error) {
+	cmd := exec.Command("go", "list", "-json", "-m", pkg)
+	pkgOut, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	pi := packageInfo{}
+	if err = json.Unmarshal(pkgOut, &pi); err != nil {
+		return "", err
+	}
+	return pi.Dir, nil
 }
