@@ -8,15 +8,13 @@ import (
 )
 
 func Command(ctx context.Context, command string) *exec.Cmd {
-	args := strings.Split(command, " ")
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd := create(ctx, command)
 	ConnectStd(cmd)
 	return cmd
 }
 
 func CommandDir(ctx context.Context, dir, command string) *exec.Cmd {
-	args := strings.Split(command, " ")
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd := create(ctx, command)
 	cmd.Dir = dir
 	ConnectStd(cmd)
 	return cmd
@@ -41,21 +39,19 @@ func RunDir(ctx context.Context, dir string, commands ...string) error {
 }
 
 func Out(ctx context.Context, command string) ([]byte, error) {
-	args := strings.Split(command, " ")
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd := create(ctx, command)
 	return cmd.Output()
 }
 
 func OutDir(ctx context.Context, dir, command string) ([]byte, error) {
-	args := strings.Split(command, " ")
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd := create(ctx, command)
 	cmd.Dir = dir
 	return cmd.Output()
 }
 
 func Pipe(first, second string) error {
-	a1 := strings.Split(first, " ")
-	c1 := exec.Command(a1[0], a1[1:]...)
+	ctx := context.Background()
+	c1 := create(ctx, first)
 
 	c1.Stderr = os.Stderr
 	p, err := c1.StdoutPipe()
@@ -63,9 +59,7 @@ func Pipe(first, second string) error {
 		return err
 	}
 
-	a2 := strings.Split(second, " ")
-	c2 := exec.Command(a2[0], a2[1:]...)
-
+	c2 := create(ctx, second)
 	c2.Stdin = p
 	c2.Stdout = os.Stdout
 	c2.Stderr = os.Stderr
@@ -89,4 +83,20 @@ func ConnectStd(cmd *exec.Cmd) {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+}
+
+func create(ctx context.Context, command string) *exec.Cmd {
+	args := make([]string, 0)
+	a := strings.Split(command, `"`)
+	for i, arg := range a {
+		if i%2 == 0 {
+			trimmed := strings.TrimSpace(arg)
+			if len(trimmed) > 0 {
+				args = append(args, strings.Split(trimmed, ` `)...)
+			}
+		} else {
+			args = append(args, arg)
+		}
+	}
+	return exec.CommandContext(ctx, args[0], args[1:]...)
 }
