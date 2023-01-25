@@ -40,6 +40,19 @@ func RunDir(ctx context.Context, dir string, commands ...string) error {
 	return nil
 }
 
+func Out(ctx context.Context, command string) ([]byte, error) {
+	args := strings.Split(command, " ")
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	return cmd.Output()
+}
+
+func OutDir(ctx context.Context, dir, command string) ([]byte, error) {
+	args := strings.Split(command, " ")
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	cmd.Dir = dir
+	return cmd.Output()
+}
+
 func Pipe(first, second string) error {
 	a1 := strings.Split(first, " ")
 	c1 := exec.Command(a1[0], a1[1:]...)
