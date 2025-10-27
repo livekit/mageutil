@@ -1,5 +1,10 @@
 module github.com/livekit/mageutil
 
-go 1.18
+go 1.23.0
 
-require golang.org/x/sync v0.0.0-20220923202941-7f9b1623fab7
+toolchain go1.24.5
+
+require (
+	github.com/livekit/protocol v1.42.2
+	golang.org/x/sync v0.16.0
+)
